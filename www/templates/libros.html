@@ -1,0 +1,32 @@
+<ion-view view-title="Libros" ng-controller="LibrosCtrl as ctrl">
+  <ion-content>
+    <!-- Utilizamos el elemento ion-list para mostrar la lista de libros
+         La lista se carga de los elementos de listadoLibros. Al pulsar en uno
+         se pasa a la vista del detalle del libro con el id seleccionado-->
+
+    <!--<div class="button-bar bar-subheader"  style="text-align: right">
+      <a class="button button-icon icon ion-android-cart" style="text-align: right" ng-click=""></a>
+    </div> -->
+
+
+    <ion-list>
+      <ion-item class="item item-thumbnail-left" ng-repeat="libro in ctrl.listaLibros" type="item-text-wrap" href="#/app/tab/libros/{{libro.id}}">
+        <img ng-src="{{libro.cover}}">
+        <h2>{{libro.title}}</h2>
+        <p>{{libro.price}}€</p>
+
+
+
+      </ion-item>
+
+
+    </ion-list>
+    <!-- El elemento infinite-scroll nos permite cargar mas elementos al hacer scroll hasta el final de la lista.
+         Con on-infinite se especifica una funcion a la que llamar cuando se llega al final de la lista.
+         Con ng-if se especifica una condicion para dejar de hacer llamadas cuando se terminan los elementos
+         Con distance se indica a que distancia del final de la lista se llama. Con 1% se llama justo al llegar
+         al final y no antes.-->
+    <ion-infinite-scroll ng-if="!ctrl.todosCargados" on-infinite="ctrl.cargarMasLibros()" distance="1%"></ion-infinite-scroll>
+
+  </ion-content>
+</ion-view>

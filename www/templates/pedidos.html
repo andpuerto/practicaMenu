@@ -1,0 +1,49 @@
+<ion-view ng-controller="PedidosCtrl as ctrl"  view-title="Pedido">
+
+  <ion-content class="padding">
+
+    <div ng-show="ctrl.hayPedidos()">
+      <ion-list>
+        <ion-item class="item" ng-repeat="pedido in ctrl.pedidos" type="item-text-wrap">
+          <img ng-src="{{libro.cover}}">
+          <h2>{{pedido.title}}</h2>
+
+
+
+
+
+          <div class="list">
+            <label class="item item-borderless item-input">
+              <span class="input-label">Cantidad: </span>
+              <input  type="number" min="0" placeholder="cantidad" step="1" pattern="[0-9]+" ng-model="pedido.cantidad" ng-change="ctrl.cambiarCantidad(pedido)">
+            </label>
+            <label class="item item-borderless">
+              <span class="input-label">Precio unitario: {{pedido.precioU}}€</span>
+            </label>
+            <label class="item item-borderless item-input item-button-right">
+              <span class="input-label">Subtotal: {{pedido.precioU*pedido.cantidad}}€</span>
+              <a class="button button-icon icon ion-ios-trash item-button-right text-right icon-right"  ng-click="ctrl.eliminarElemento(pedido)"></a>
+            </label>
+          </div>
+
+
+           <!-- <label >Cantidad:
+
+              <input  type="number" min="0" placeholder="cantidad" step="1" pattern="[0-9]+" ng-model="pedido.cantidad" ng-change="ctrl.cambiarCantidad(pedido)">
+            </label>-->
+
+ <!--         <p>Precio unitario: {{pedido.precioU}}€</p>
+          <p>Subtotal: {{pedido.precioU*pedido.cantidad}}€</p>
+          <a class="button button-icon icon ion-ios-trash item-button-right" style="text-align: right" ng-click="ctrl.eliminarElemento(pedido)"></a>
+       -->
+        </ion-item>
+      </ion-list>
+      <h3>Precio Total: {{ctrl.precioTotal}}€</h3>
+    </div>
+
+    <div ng-show="!ctrl.hayPedidos()"><h1>No hay elementos en el pedido</h1></div>
+
+  </ion-content>
+
+
+</ion-view>

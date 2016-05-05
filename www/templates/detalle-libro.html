@@ -1,0 +1,47 @@
+<ion-view ng-controller="DetalleLibroCtrl as ctrl"  view-title="Libro">
+
+<ion-content class="padding">
+
+  <div class = "row">
+    <div class = "col col-33"><img ng-src="{{ctrl.libro.cover}}" style="width:100%"></div>
+    <div class = "col">{{ctrl.libro.title}}</div>
+  </div>
+
+  <ion-item>
+    <div class="positive">Autor:</div>
+    <div class="col">{{ctrl.libro.author}}</div>
+  </ion-item>
+  <ion-item>
+    <div class="positive">ISBN: </div>
+    <div class = "col ">{{ctrl.libro.ISBN}}</div>
+  </ion-item>
+  <ion-item ng-click="ctrl.openPopover($event)">
+    <div class="positive">Reseña:</div>
+    <div class = "col " ng-bind-html="ctrl.libro.review"></div>
+    <div class="text-right calm">más...</div>
+  </ion-item>
+
+<ion-item>
+  <div class="positive">Añadir al pedido: </div>
+  <div class="row">
+    <div class="col col-40">
+      <input style="width:100%;" type="number" min="1" placeholder="cantidad" step="1" pattern="[0-9]+" ng-model="ctrl.cantidad"></div>
+    <div class="col"><a class="button button-icon icon ion-android-cart" ng-click="ctrl.agregarLibro()"></a></div>
+  </div>
+</ion-item>
+
+
+  </ion-content>
+
+
+<script id = "review-popover.html" type = "text/ng-template">
+  <ion-popover-view>
+    <ion-header-bar>
+      <h1 class="title">Reseña</h1>
+    </ion-header-bar>
+    <ion-content class="padding">
+      <div class = "col " ng-bind-html="ctrl.libro.review"></div>
+    </ion-content>
+  </ion-popover-view>
+  </script>
+</ion-view>
