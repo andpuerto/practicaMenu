@@ -13,14 +13,14 @@
 
 
           <div class="list">
-            <label class="item item-borderless item-input">
+            <label class="item item-borderless item-input item-pedido">
               <span class="input-label">Cantidad: </span>
               <input  type="number" min="0" placeholder="cantidad" step="1" pattern="[0-9]+" ng-model="pedido.cantidad" ng-change="ctrl.cambiarCantidad(pedido)">
             </label>
-            <label class="item item-borderless">
+            <label class="item item-borderless item-pedido">
               <span class="input-label">Precio unitario: {{pedido.precioU}}€</span>
             </label>
-            <label class="item item-borderless item-input item-button-right">
+            <label class="item item-borderless item-input item-button-right item-pedido-final">
               <span class="input-label">Subtotal: {{pedido.precioU*pedido.cantidad}}€</span>
               <a class="button button-icon icon ion-ios-trash item-button-right text-right icon-right"  ng-click="ctrl.eliminarElemento(pedido)"></a>
             </label>

@@ -1,1 +1,15 @@
 /* Empty. Add your own CSS if you like */
+.item-pedido{
+  padding-bottom: 0;
+  padding-top: 0;
+  margin-bottom: 0;
+  margin-top:0;
+
+}
+
+.item-pedido-final{
+  padding-top: 0;
+  margin-bottom: 0;
+  margin-top:0;
+
+}
