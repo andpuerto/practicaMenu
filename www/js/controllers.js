@@ -1,6 +1,7 @@
 angular.module('starter.controllers', [])
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout) {
+//.controller('AppCtrl', function($scope, $ionicModal, $timeout) {
+.controller('AppCtrl', ['$state', function($state) {
 
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
@@ -9,37 +10,49 @@ angular.module('starter.controllers', [])
   //$scope.$on('$ionicView.enter', function(e) {
   //});
 
-  // Form data for the login modal
-  $scope.loginData = {};
+  //// Form data for the login modal
+  //$scope.loginData = {};
+  //
+  //// Create the login modal that we will use later
+  //$ionicModal.fromTemplateUrl('templates/loginant.html', {
+  //  scope: $scope
+  //}).then(function(modal) {
+  //  $scope.modal = modal;
+  //});
+  //
+  //// Triggered in the login modal to close it
+  //$scope.closeLogin = function() {
+  //  $scope.modal.hide();
+  //};
+  //
+  //// Open the login modal
+  //$scope.login = function() {
+  //  $scope.modal.show();
+  //};
+  //
+  //// Perform the login action when the user submits the login form
+  //$scope.doLogin = function() {
+  //  console.log('Doing login', $scope.loginData);
+  //
+  //  // Simulate a login delay. Remove this and replace with your login
+  //  // code if using a login system
+  //  $timeout(function() {
+  //    $scope.closeLogin();
+  //  }, 1000);
+  //};
+  //
 
-  // Create the login modal that we will use later
-  $ionicModal.fromTemplateUrl('templates/loginant.html', {
-    scope: $scope
-  }).then(function(modal) {
-    $scope.modal = modal;
-  });
+  var self = this;
 
-  // Triggered in the login modal to close it
-  $scope.closeLogin = function() {
-    $scope.modal.hide();
+  //Funcion para hacer el logout
+  self.logout = function(){
+    //Eliminamos el usuario de la sesion y volvemos a la pantalla de login
+    sessionStorage.usuario = null;
+    $state.go('login');
   };
 
-  // Open the login modal
-  $scope.login = function() {
-    $scope.modal.show();
-  };
 
-  // Perform the login action when the user submits the login form
-  $scope.doLogin = function() {
-    console.log('Doing login', $scope.loginData);
-
-    // Simulate a login delay. Remove this and replace with your login
-    // code if using a login system
-    $timeout(function() {
-      $scope.closeLogin();
-    }, 1000);
-  };
-})
+}])
 
 .controller('PlaylistsCtrl', function($scope) {
   $scope.playlists = [
@@ -71,7 +84,11 @@ angular.module('starter.controllers', [])
         .success(function (data, status, headers, config) {
           //Si la atransmision ha sido correcta, comprobamos el estado
           if(data.status=='OK'){
-            //Si recibimos OK (login y password correctos), pasamos a la siguiente pantalla
+            //Si recibimos OK (login y password correctos)
+            //Guardamos el nombre de usuario en la sesion
+            sessionStorage.usuario = self.logindata.username;
+            //pasamos a la siguiente pantalla, borrando antes los datos de login
+            self.logindata = {};
             $state.go('app.tab.libros');
           }else{
             //Si recibimos un KO avisamos al usuario de que los datos no son correctos
@@ -88,12 +105,13 @@ angular.module('starter.controllers', [])
             template: 'No se ha podido contactar con el servidor'
           });
         });
-    }
+    };
+
   }])
 
 
   //Controlador para la lista de libros
-  .controller('LibrosCtrl', ['$ionicPopup', 'Libros', '$scope', function($ionicPopup, Libros, $scope) {
+  .controller('LibrosCtrl', ['$ionicPopup', 'Libros', '$scope', '$state', function($ionicPopup, Libros, $scope, $state) {
     var self = this;
     //Pagina cargada actualmente
     self.paginaLibros=0;
@@ -101,6 +119,11 @@ angular.module('starter.controllers', [])
     self.todosCargados=false;
     //Array con todos los libros de la lista
     self.listaLibros=[];
+
+    //Controlamos si se ha realizado el proceso de login. Si no es asi, se vuelve a la pantalla de login.
+    if(sessionStorage.usuario == null){
+      $state.go('login');
+    }
 
     //Funcion para cargar mas libros. Se le llamara cada vez que se quiera cargar una
     //Pagina nueva
@@ -148,11 +171,17 @@ angular.module('starter.controllers', [])
   }])
 
   //Controlador para el detalle del libro
-  .controller('DetalleLibroCtrl', ['$stateParams', '$ionicPopup', '$ionicPopover', 'DetalleLibro', '$scope', function($stateParams,$ionicPopup, $ionicPopover, DetalleLibro, $scope) {
+  .controller('DetalleLibroCtrl', ['$stateParams', '$ionicPopup', '$ionicPopover', 'DetalleLibro', '$scope', '$state',
+    function($stateParams,$ionicPopup, $ionicPopover, DetalleLibro, $scope, $state) {
     var self = this;
 
     //Cantidad del libro para añadir al pedido en caso de que se pulse el boton
     self.cantidad = 1;
+
+    //Controlamos si se ha realizado el proceso de login. Si no es asi, se vuelve a la pantalla de login.
+    if(sessionStorage.usuario == null){
+      $state.go('login');
+    }
 
     //Para depuracion: eliminamos todos los datos de pedidos. Descomentar para vaciar la lista en las pruebas
     //localStorage.clear();
@@ -247,10 +276,15 @@ angular.module('starter.controllers', [])
 
 
   //Controlador para el pedido
-  .controller('PedidosCtrl', ['$ionicPopup', '$scope', 'Login', function($ionicPopup, $scope, Login) {
+  .controller('PedidosCtrl', ['$ionicPopup', '$scope', '$state', function($ionicPopup, $scope, $state) {
     var self=this;
 
     self.precioTotal = 0;
+
+    //Controlamos si se ha realizado el proceso de login. Si no es asi, se vuelve a la pantalla de login.
+    if(sessionStorage.usuario == null){
+      $state.go('login');
+    }
 
     //Utilizamos el evento beforeEnter para recargar la lista de pedidos cada vez que se muestra la vista
     //Puede ser que se haya actualizado en la vista del detalle de libro y, por tanto, debemos volver a cargarla
