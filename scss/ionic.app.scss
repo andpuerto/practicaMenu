@@ -15,9 +15,39 @@ $royal:                           #886aea !default;
 $dark:                            #444 !default;
 */
 
+
+
+//Personalizacion de los colores de ionic
+$positive: teal ;
+$calm: #483D8B ;
+$royal: #6A5ACD;
+
+
 // The path for our ionicons font files, relative to the built CSS in www/css
 $ionicons-font-path: "../lib/ionic/fonts" !default;
 
 // Include all of Ionic
-@import "www/lib/ionic/scss/ionic";
+@import "../www/lib/ionic/scss/ionic";
 
+
+//Personalizacion de la fuente para la barra de navegacion
+.bar-positive{
+  font-family: "Verdana";
+}
+
+//Estilo para las filas de los elementos del pedido
+.item-pedido{
+  padding-bottom: 0;
+  padding-top: 0;
+  margin-bottom: 0;
+  margin-top:0;
+
+}
+
+//Estilo para la ultima fila de los elementos del pedido
+.item-pedido-final{
+  padding-top: 0;
+  margin-bottom: 0;
+  margin-top:0;
+  padding-bottom: 5px;
+}

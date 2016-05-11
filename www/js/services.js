@@ -1,56 +1,7 @@
 angular.module('starter.services', [])
 
-.factory('Chats', function() {
-  // Might use a resource here that returns a JSON array
-
-  // Some fake testing data
-  var chats = [{
-    id: 0,
-    name: 'Ben Sparrow',
-    lastText: 'You on your way?',
-    face: 'img/ben.png'
-  }, {
-    id: 1,
-    name: 'Max Lynx',
-    lastText: 'Hey, it\'s me',
-    face: 'img/max.png'
-  }, {
-    id: 2,
-    name: 'Adam Bradleyson',
-    lastText: 'I should buy a boat',
-    face: 'img/adam.jpg'
-  }, {
-    id: 3,
-    name: 'Perry Governor',
-    lastText: 'Look at my mukluks!',
-    face: 'img/perry.png'
-  }, {
-    id: 4,
-    name: 'Mike Harrington',
-    lastText: 'This is wicked good ice cream.',
-    face: 'img/mike.png'
-  }];
-
-  return {
-    all: function() {
-      return chats;
-    },
-    remove: function(chat) {
-      chats.splice(chats.indexOf(chat), 1);
-    },
-    get: function(chatId) {
-      for (var i = 0; i < chats.length; i++) {
-        if (chats[i].id === parseInt(chatId)) {
-          return chats[i];
-        }
-      }
-      return null;
-    }
-  };
-})
-
 //Servicio de login
-  .factory('Login', function($http) {
+  .factory('Login', ['$http', function($http) {
 
     //Configuracion y url para enviar los datos de login
     var config = {
@@ -68,10 +19,10 @@ angular.module('starter.services', [])
         return $http.post(url, dataStr, config);
         }
     };
-  })
+  }])
 
 //Servicio para la lista de libros
-  .factory('Libros', function($http) {
+  .factory('Libros', ['$http', function($http) {
     var config = {
       headers : {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -89,10 +40,11 @@ angular.module('starter.services', [])
         return $http.post(url, dataStr, config);
       }
     };
-  })
+  }])
+
 
   //Servicio para detalles del libro
-  .factory('DetalleLibro', function($http) {
+  .factory('DetalleLibro', ['$http', function($http) {
     var config = {
       headers : {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -111,4 +63,32 @@ angular.module('starter.services', [])
         return $http.post(url, dataStr, config);
       }
     };
-  });
+  }])
+
+
+  //Servicio para mostrar el spinner en las cargas.
+  //Se ha implementado como servicio porque se utiliza en diversos controladores
+  //y asi pueden acceder todos al mismo codigo
+  .factory('Preloader', ['$ionicLoading', function($ionicLoading) {
+    //Plantilla para el spinner
+    var spinnerTemplate='<p>Cargando...</p><ion-spinner></ion-spinner>';
+
+    return {
+      //Muestra el spinner
+      showSpinner: function() {
+        $ionicLoading.show({
+          template: spinnerTemplate,
+          animation: 'fade-in',
+          showBackdrop: false,
+          //Establecemos un retraso, de forma que si la lectura es rapida no aparezca el spinner, ya que
+          //solo ralentizaria y afearia la transicion
+          showDelay: 200
+        });
+      },
+      //Oculta el spinner
+      hideSpinner: function(){
+        $ionicLoading.hide();
+      }
+
+    };
+  }]);

@@ -1,46 +1,7 @@
 angular.module('starter.controllers', [])
 
-//.controller('AppCtrl', function($scope, $ionicModal, $timeout) {
+//Controlador de la aplicacion
 .controller('AppCtrl', ['$state', function($state) {
-
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
-
-  //// Form data for the login modal
-  //$scope.loginData = {};
-  //
-  //// Create the login modal that we will use later
-  //$ionicModal.fromTemplateUrl('templates/loginant.html', {
-  //  scope: $scope
-  //}).then(function(modal) {
-  //  $scope.modal = modal;
-  //});
-  //
-  //// Triggered in the login modal to close it
-  //$scope.closeLogin = function() {
-  //  $scope.modal.hide();
-  //};
-  //
-  //// Open the login modal
-  //$scope.login = function() {
-  //  $scope.modal.show();
-  //};
-  //
-  //// Perform the login action when the user submits the login form
-  //$scope.doLogin = function() {
-  //  console.log('Doing login', $scope.loginData);
-  //
-  //  // Simulate a login delay. Remove this and replace with your login
-  //  // code if using a login system
-  //  $timeout(function() {
-  //    $scope.closeLogin();
-  //  }, 1000);
-  //};
-  //
 
   var self = this;
 
@@ -51,27 +12,11 @@ angular.module('starter.controllers', [])
     $state.go('login');
   };
 
-
 }])
 
-.controller('PlaylistsCtrl', function($scope) {
-  $scope.playlists = [
-    { title: 'Reggae', id: 1 },
-    { title: 'Chill', id: 2 },
-    { title: 'Dubstep', id: 3 },
-    { title: 'Indie', id: 4 },
-    { title: 'Rap', id: 5 },
-    { title: 'Cowbell', id: 6 }
-  ];
-})
 
-.controller('PlaylistCtrl', function($scope, $stateParams) {
-})
-
-
-
-//Controlador para las funciones de login
-  .controller('LoginCtrl', ['$ionicPopup', '$state', 'Login', function($ionicPopup, $state, Login) {
+  //Controlador para las funciones de login
+  .controller('LoginCtrl', ['$ionicPopup', '$state', 'Login', 'Preloader', function($ionicPopup, $state, Login, Preloader) {
     var self=this;
 
     self.logindata = {};
@@ -79,9 +24,11 @@ angular.module('starter.controllers', [])
 
     //Funcion que se llamara cuando se realice el login
     self.login = function() {
+      //Mostramos un spinner indicando que se esta cargando la pagina
+      Preloader.showSpinner();
       //Llamamos al servicio de login para que se envien los datos al servidor
       Login.enter(self.logindata.username, self.logindata.password)
-        .success(function (data, status, headers, config) {
+        .success(function (data) {
           //Si la atransmision ha sido correcta, comprobamos el estado
           if(data.status=='OK'){
             //Si recibimos OK (login y password correctos)
@@ -98,20 +45,26 @@ angular.module('starter.controllers', [])
             });
           }
         })
-        .error(function (data, status, header, config) {
+        .error(function () {
           //Si falla la transmision, avisamos al usuario
           $ionicPopup.alert({
             title: 'Error',
             template: 'No se ha podido contactar con el servidor'
           });
-        });
+        }).finally(function() {
+        //Pase lo que pase ocultamos el spinner
+        Preloader.hideSpinner();
+      });
     };
+
+
+
 
   }])
 
 
   //Controlador para la lista de libros
-  .controller('LibrosCtrl', ['$ionicPopup', 'Libros', '$scope', '$state', function($ionicPopup, Libros, $scope, $state) {
+  .controller('LibrosCtrl', ['$ionicPopup', 'Libros', '$scope', '$state', 'Preloader', function($ionicPopup, Libros, $scope, $state, Preloader) {
     var self = this;
     //Pagina cargada actualmente
     self.paginaLibros=0;
@@ -133,14 +86,19 @@ angular.module('starter.controllers', [])
       var tituloerror='Error';
 
       //Obtenemos los datos desde el servicio de libros. Le pasamos el siguiente numero de pagina
+      //Si vamos a cargar la primera pagina, mostramos el spinner. En paginas posteriores no se hace
+      //porque la propia lista muestra un spiner en la parte inferior
+      if(self.paginaLibros == 0){
+        Preloader.showSpinner();
+      }
       Libros.getLista(++self.paginaLibros)
-        .success(function (data, status, headers, config) {
+        .success(function (data) {
           //Si la recepcion de informacion ha sido correcta, tenemos que comprobar el estado
           if(data.status!='KO'){
             //Si no recibimos KO, lo que tenemos en data son los objetos de la lista.
             //Los agregamos a la lista y avisamos de que se ha terminado la accion para
             //el infinite scroll
-            for (i in data){
+            for (var i in data){
               self.listaLibros.push(data[i]);
             }
             $scope.$broadcast('scroll.infiniteScrollComplete');
@@ -159,11 +117,16 @@ angular.module('starter.controllers', [])
           }
         })
         //Si ha fallado la obtencion de datos, avisamos al usuario
-        .error(function (data, status, header, config) {
+        .error(function () {
           $ionicPopup.alert({
             title: tituloerror,
             template: errordatos
-          });
+          })
+          ;
+        })
+        //En cualquier caso, ocultamos el spinner
+        .finally(function () {
+            Preloader.hideSpinner();
         });
 
     }
@@ -171,8 +134,8 @@ angular.module('starter.controllers', [])
   }])
 
   //Controlador para el detalle del libro
-  .controller('DetalleLibroCtrl', ['$stateParams', '$ionicPopup', '$ionicPopover', 'DetalleLibro', '$scope', '$state',
-    function($stateParams,$ionicPopup, $ionicPopover, DetalleLibro, $scope, $state) {
+  .controller('DetalleLibroCtrl', ['$stateParams', '$ionicPopup', '$ionicPopover', 'DetalleLibro', '$scope', '$state', 'Preloader',
+    function($stateParams,$ionicPopup, $ionicPopover, DetalleLibro, $scope, $state, Preloader) {
     var self = this;
 
     //Cantidad del libro para añadir al pedido en caso de que se pulse el boton
@@ -188,8 +151,8 @@ angular.module('starter.controllers', [])
 
     //Para depuracion. Imprimimos todos los elementos almacenados en el localstorage
     var ids = Object.keys(localStorage);
-    var i = 0;
-    for(i=0; i<ids.length; i++) {
+
+    for(var i=0; i<ids.length; i++) {
       //values.push( localStorage.getItem(keys[i]) );
       var elemento = JSON.parse(localStorage.getItem(ids[i]));
       console.log(elemento);
@@ -212,9 +175,11 @@ angular.module('starter.controllers', [])
       self.popover = popover;
     });
 
+    //Mostramos el spinner avisando del proceso de carga
+    Preloader.showSpinner();
     //Tratamos de obtener los detalles del libro
     DetalleLibro.getDetalles($stateParams.libroId)
-      .success(function (data, status, headers, config) {
+      .success(function (data) {
         //Si la recepcion de informacion ha sido correcta, tenemos que comprobar el estado
         if(data.status!='KO'){
           //Si no recibimos KO, lo que tenemos en data campos del detalle del libro
@@ -229,11 +194,15 @@ angular.module('starter.controllers', [])
         }
       })
       //Si ha fallado la obtencion de datos, avisamos al usuario
-      .error(function (data, status, header, config) {
+      .error(function () {
         $ionicPopup.alert({
           title: tituloerror,
           template: errordatos
         });
+      })
+      .finally(function () {
+        //Ocultamos el spinner
+        Preloader.hideSpinner();
       });
 
 
@@ -288,7 +257,7 @@ angular.module('starter.controllers', [])
 
     //Utilizamos el evento beforeEnter para recargar la lista de pedidos cada vez que se muestra la vista
     //Puede ser que se haya actualizado en la vista del detalle de libro y, por tanto, debemos volver a cargarla
-    $scope.$on("$ionicView.beforeEnter", function(event, data){
+    $scope.$on("$ionicView.beforeEnter", function(){
       self.recargarPedidos();
     });
 
