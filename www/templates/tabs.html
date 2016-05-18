@@ -17,7 +17,7 @@
 
 
   <!-- Tab de pedidos -->
-  <ion-tab title="Pedido" icon-off="icon ion-ios-cart-outline" icon-on="icon ion-ios-cart"" href="#/app/tab/pedidos">
+  <ion-tab title="Pedido({{ctrl.getNumItems()}})" icon-off="icon ion-ios-cart-outline" disabled="ctrl.getNumItems()<=0" icon-on="icon ion-ios-cart"" href="#/app/tab/pedidos">
     <ion-nav-view name="tab-pedidos"></ion-nav-view>
   </ion-tab>
 

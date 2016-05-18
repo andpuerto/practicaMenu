@@ -64,7 +64,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
         abstract: true,
         views: {
           'menuContent': {
-            templateUrl: 'templates/tabs.html'
+            templateUrl: 'templates/tabs.html',
           }
         }
       })

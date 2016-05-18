@@ -1,6 +1,8 @@
 angular.module('starter.services', [])
 
-//Servicio de login
+  //**********************************
+  //Servicio de login
+  //**********************************
   .factory('Login', ['$http', function($http) {
 
     //Configuracion y url para enviar los datos de login
@@ -21,7 +23,10 @@ angular.module('starter.services', [])
     };
   }])
 
-//Servicio para la lista de libros
+
+  //**********************************
+  //Servicio para la lista de libros
+  //**********************************
   .factory('Libros', ['$http', function($http) {
     var config = {
       headers : {
@@ -43,7 +48,9 @@ angular.module('starter.services', [])
   }])
 
 
+  //**********************************
   //Servicio para detalles del libro
+  //**********************************
   .factory('DetalleLibro', ['$http', function($http) {
     var config = {
       headers : {
@@ -58,7 +65,6 @@ angular.module('starter.services', [])
       //al numero de pagina que recibe como parametro.
       //Devuelve el resultado del post
       getDetalles: function(idLibro) {
-        console.log("id"+idLibro);
         var dataStr = "id="+idLibro;
         return $http.post(url, dataStr, config);
       }
@@ -66,9 +72,11 @@ angular.module('starter.services', [])
   }])
 
 
+  //**********************************
   //Servicio para mostrar el spinner en las cargas.
   //Se ha implementado como servicio porque se utiliza en diversos controladores
   //y asi pueden acceder todos al mismo codigo
+  //**********************************
   .factory('Preloader', ['$ionicLoading', function($ionicLoading) {
     //Plantilla para el spinner
     var spinnerTemplate='<p>Cargando...</p><ion-spinner></ion-spinner>';

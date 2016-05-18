@@ -1,6 +1,8 @@
 angular.module('starter.controllers', [])
 
+//**********************************
 //Controlador de la aplicacion
+//**********************************
 .controller('AppCtrl', ['$state', function($state) {
 
   var self = this;
@@ -12,10 +14,19 @@ angular.module('starter.controllers', [])
     $state.go('login');
   };
 
+
+  //Devuelve el numero de elementos de pedido almacenados
+  self.getNumItems = function(){
+    return Object.keys(localStorage).length;
+
+  };
 }])
 
 
+
+  //**********************************
   //Controlador para las funciones de login
+  //**********************************
   .controller('LoginCtrl', ['$ionicPopup', '$state', 'Login', 'Preloader', function($ionicPopup, $state, Login, Preloader) {
     var self=this;
 
@@ -56,14 +67,12 @@ angular.module('starter.controllers', [])
         Preloader.hideSpinner();
       });
     };
-
-
-
-
   }])
 
 
+  //**********************************
   //Controlador para la lista de libros
+  //**********************************
   .controller('LibrosCtrl', ['$ionicPopup', 'Libros', '$scope', '$state', 'Preloader', function($ionicPopup, Libros, $scope, $state, Preloader) {
     var self = this;
     //Pagina cargada actualmente
@@ -130,10 +139,12 @@ angular.module('starter.controllers', [])
         });
 
     }
-
   }])
 
+
+  //**********************************
   //Controlador para el detalle del libro
+  //**********************************
   .controller('DetalleLibroCtrl', ['$stateParams', '$ionicPopup', '$ionicPopover', 'DetalleLibro', '$scope', '$state', 'Preloader',
     function($stateParams,$ionicPopup, $ionicPopover, DetalleLibro, $scope, $state, Preloader) {
     var self = this;
@@ -145,20 +156,6 @@ angular.module('starter.controllers', [])
     if(sessionStorage.usuario == null){
       $state.go('login');
     }
-
-    //Para depuracion: eliminamos todos los datos de pedidos. Descomentar para vaciar la lista en las pruebas
-    //localStorage.clear();
-
-    //Para depuracion. Imprimimos todos los elementos almacenados en el localstorage
-    var ids = Object.keys(localStorage);
-
-    for(var i=0; i<ids.length; i++) {
-      //values.push( localStorage.getItem(keys[i]) );
-      var elemento = JSON.parse(localStorage.getItem(ids[i]));
-      console.log(elemento);
-      console.log("ID: " + ids[i] + ". Titulo: " + elemento.title + ". Cantidad: " + elemento.cantidad);
-    }
-
 
     //Mensajes de error
     var errordatos='No se pudieron obtener los datos del libro';
@@ -221,6 +218,7 @@ angular.module('starter.controllers', [])
       self.popover.remove();
     });
 
+    //Agrega el libro al pedido
     self.agregarLibro = function(){
       //Agregamos al array el id del libro y la cantidad
       //Tomamos del almacenamiento posibles datos anteriores para ese libro
@@ -230,21 +228,16 @@ angular.module('starter.controllers', [])
       if(pedidoAnt != null){
         nuevaCantidad = self.cantidad + parseInt(pedidoAnt.cantidad);
       }
-      //Para depuracion
-      console.log("Voy a meter: ID: " +  self.libro.id + ". Titulo: " + self.libro.title + ". Cantidad: " + nuevaCantidad);
       //Metemos en el almacenamiento el nuevo libro con la cantidad calculada en su caso
       var pedidoTmp = {title:self.libro.title, cantidad:nuevaCantidad, precioU:self.libro.price};
       localStorage.setItem(self.libro.id, JSON.stringify(pedidoTmp));
-
-      //$scope.pedido.push(self.libro.title);
-      //Mostrar mensaje (¿toast?) avisando de la insercion correcta
     };
-
-
   }])
 
 
+  //**********************************
   //Controlador para el pedido
+  //**********************************
   .controller('PedidosCtrl', ['$ionicPopup', '$scope', '$state', function($ionicPopup, $scope, $state) {
     var self=this;
 

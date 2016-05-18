@@ -2,16 +2,18 @@
 
   <ion-content class="padding">
 
+    <!-- Si hay pedidos, mostramos la lista de pedidos -->
     <div ng-show="ctrl.hayPedidos()">
       <ion-list>
+        <!-- Introduce los elementos obtenidos del controlador -->
         <ion-item class="item" ng-repeat="pedido in ctrl.pedidos" type="item-text-wrap">
           <img ng-src="{{libro.cover}}">
           <h2>{{pedido.title}}</h2>
-
-
+          <!-- Utilizo la clase list para organizar el contenido para cada pedido -->
           <div class="list">
             <label class="item item-borderless item-input item-pedido">
               <span class="input-label">Cantidad: </span>
+              <!-- Cuando se cambia la cantidad del pedido se llama a un metodo que se encarga de pasarlo al almacenamiento -->
               <input  type="number" min="0" placeholder="cantidad" step="1" pattern="[0-9]+" ng-model="pedido.cantidad" ng-change="ctrl.cambiarCantidad(pedido)">
             </label>
             <label class="item item-borderless item-pedido">
@@ -26,9 +28,11 @@
 
         </ion-item>
       </ion-list>
+      <!-- Precio total del pedido en la parte inferior de la lista -->
       <h3>Precio Total: {{ctrl.precioTotal}}€</h3>
     </div>
 
+    <!-- Si no hay pedidos, mostramos el mensaje avisando de ello -->
     <div ng-show="!ctrl.hayPedidos()"><h1>No hay elementos en el pedido</h1></div>
 
   </ion-content>
