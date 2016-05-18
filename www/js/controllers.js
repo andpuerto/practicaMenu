@@ -7,7 +7,9 @@ angular.module('starter.controllers', [])
 
     var self = this;
 
+    //------------------------
     //Funcion para hacer el logout
+    //------------------------
     self.logout = function(){
       //Eliminamos el usuario de la sesion y volvemos a la pantalla de login
       sessionStorage.usuario = null;
@@ -15,10 +17,12 @@ angular.module('starter.controllers', [])
     };
 
 
+    //------------------------
     //Devuelve el numero de elementos de pedido almacenados
+    //------------------------
     self.getNumItems = function(){
-      return Object.keys(localStorage).length;
-
+      var ped = JSON.parse(localStorage.getItem("pedido"));
+      return ped==null ? 0 : ped.length;
     };
   }])
 
@@ -33,7 +37,9 @@ angular.module('starter.controllers', [])
     self.logindata = {};
 
 
+    //------------------------
     //Funcion que se llamara cuando se realice el login
+    //------------------------
     self.login = function() {
       //Mostramos un spinner indicando que se esta cargando la pagina
       Preloader.showSpinner();
@@ -87,8 +93,10 @@ angular.module('starter.controllers', [])
       $state.go('login');
     }
 
+    //------------------------
     //Funcion para cargar mas libros. Se le llamara cada vez que se quiera cargar una
     //Pagina nueva
+    //------------------------
     self.cargarMasLibros = function(){
       //Mensajes de error
       var errordatos='No se pudieron leer los datos';
@@ -203,39 +211,67 @@ angular.module('starter.controllers', [])
         });
 
 
+      //------------------------
       //Funcion para abrir el popover cuando se quiera ver la review completa
+      //------------------------
       self.openPopover = function($event){
         self.popover.show($event);
       };
 
+      //------------------------
       //Cierra el popover
+      //------------------------
       self.closePopover = function() {
         self.popover.hide();
       };
 
+      //------------------------
       //Elimina el popover cuando ya no se necesita
+      //------------------------
       $scope.$on('$destroy', function() {
         self.popover.remove();
       });
 
+
+      //------------------------
       //Agrega el libro al pedido
+      //------------------------
       self.agregarLibro = function(){
-        //Agregamos al array el id del libro y la cantidad
+
         //Tomamos del almacenamiento posibles datos anteriores para ese libro
-        var pedidoAnt = JSON.parse(localStorage.getItem(self.libro.id));
+        var pedidoAnt = null;
+        var pedidos = JSON.parse(localStorage.getItem("pedido"));
+        if(pedidos == null){
+          pedidos = [];
+        }
+        var posicion = -1;
+        for(var i=0; i<pedidos.length; i++){
+          if(pedidos[i].id == self.libro.id){
+            pedidoAnt = pedidos[i];
+            posicion = i;
+            break;
+          }
+        }
+
         //Nos aseguramos de que la cantidad sea mayor que cero
         self.comprobarCantidadCero();
         var nuevaCantidad = self.cantidad;
         //Si hay datos anteriores para ese libro, la cantidad a introducir sera la suma de la anterior y la nueva
         if(pedidoAnt != null){
-          nuevaCantidad = self.cantidad + parseInt(pedidoAnt.cantidad);
+          pedidos[posicion].cantidad = self.cantidad + parseInt(pedidoAnt.cantidad);
+        }else{
+          //Si el pedido no estaba, introducimos un nuevo elemento en el array
+          pedidos.push({id:self.libro.id, title:self.libro.title, cantidad:nuevaCantidad, precioU:self.libro.price});
         }
-        //Metemos en el almacenamiento el nuevo libro con la cantidad calculada en su caso
-        var pedidoTmp = {title:self.libro.title, cantidad:nuevaCantidad, precioU:self.libro.price};
-        localStorage.setItem(self.libro.id, JSON.stringify(pedidoTmp));
+
+        //Metemos los datos en el almacenamiento
+        localStorage.setItem("pedido", JSON.stringify(pedidos));
       };
 
+
+      //------------------------
       //Comprueba se la cantidad es cero y, en tal caso, la pone a uno
+      //------------------------
       self.comprobarCantidadCero = function(){
         if(self.cantidad == null || self.cantidad <= 0){
           self.cantidad = 1;
@@ -266,42 +302,56 @@ angular.module('starter.controllers', [])
     });
 
 
+    //------------------------
     //Cargamos los elementos del pedido desde el almacenamiento.
+    //------------------------
     self.recargarPedidos = function(){
       self.pedidos = [];
-      //Tomamos todos los elementos del localStorage y los agregamos al array
-      var ids = Object.keys(localStorage);
-      for(var i=0; i<ids.length; i++) {
-        var elemento = JSON.parse(localStorage.getItem(ids[i]));
-        self.pedidos.push({id:ids[i], title:elemento.title, cantidad:elemento.cantidad, precioU:elemento.precioU});
-      }
+
+      //Cargamos el array de pedidos anteriores del almacenamiento
+      self.pedidos = JSON.parse(localStorage.getItem("pedido"));
+
       //Calculamos el total
       self.calcularTotal();
     };
 
 
+    //------------------------
     //Devuelve verdadero si hay algun elemento en la lista de pedidos
+    //------------------------
     self.hayPedidos = function(){
       return self.pedidos.length > 0;
     };
 
 
+    //------------------------
     //Almacena de nuevo el elemento que recibe como parametro
+    //------------------------
     self.cambiarCantidad = function(elemento){
+
+
       //Si la cantidad es mayor que cero, guardamos los datos
       //Hay que considerar este caso porque el usuario puede borrar el numero para editarlo
       if(elemento.cantidad > 0) {
-          localStorage.setItem(elemento.id, JSON.stringify({
-          title: elemento.title,
-          cantidad: elemento.cantidad,
-          precioU: elemento.precioU
-        }));
+        //Actualizamos la cantidad del elemento cambiado
+        for(var i=0; i<self.pedidos.length; i++){
+          if(self.pedidos[i].id == elemento.id){
+            self.pedidos[i].cantidad = elemento.cantidad;
+            break;
+          }
+        }
+        //Almacenamos el array
+        localStorage.setItem("pedido", JSON.stringify(self.pedidos));
+
         //Recalculamos el precio total
         self.calcularTotal();
       }
     };
 
+
+    //------------------------
     //Comprueba si la cantidad introducida es cero o nulo
+    //------------------------
     self.comprobarCantidadCero = function(elemento){
       //Si el campo esta vacio, lo ponemos a cero para evitar problemas
       if(elemento.cantidad === null){
@@ -313,7 +363,10 @@ angular.module('starter.controllers', [])
       }
     };
 
+
+    //------------------------
     //Calcula el importe total del pedido
+    //------------------------
     self.calcularTotal = function(){
       self.precioTotal = 0;
       for(var i=0; i<self.pedidos.length; i++){
@@ -322,8 +375,10 @@ angular.module('starter.controllers', [])
     };
 
 
+    //------------------------
     //Pide confirmacion para eliminar el elemento
     //Si se confirma, se borra del almacenamiento y se recarga la lista
+    //------------------------
     self.eliminarElemento = function(elemento){
       $ionicPopup.confirm({
           title: 'Eliminar elemento',
@@ -331,7 +386,20 @@ angular.module('starter.controllers', [])
         })
         .then(function(res) {
           if(res) {
-            localStorage.removeItem(elemento.id);
+            //Hallamos la posicion del elemento a eliminar
+            var posicion=-1;
+            for(var i=0; i<self.pedidos.length; i++){
+              if(self.pedidos[i].id == elemento.id){
+                posicion=i;
+                break;
+              }
+            }
+            //Eliminamos el elemento del array y lo pasamos al almacenamiento
+            if(posicion >=0 ) {
+              self.pedidos.splice(posicion,1);
+              localStorage.setItem("pedido", JSON.stringify(self.pedidos));
+            }
+
             //Recargamos la lista de pedidos tras la eliminacion
             self.recargarPedidos();
           }else{
@@ -343,7 +411,6 @@ angular.module('starter.controllers', [])
           }
         });
     };
-
 
 
   }]);
