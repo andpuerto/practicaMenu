@@ -25,7 +25,8 @@
   <div class="positive">Añadir al pedido: </div>
   <div class="row">
     <div class="col col-40">
-      <input style="width:100%;" type="number" min="1" placeholder="cantidad" step="1" pattern="[0-9]+" ng-model="ctrl.cantidad"></div>
+      <!-- Input para la cantidad. Cuando pierde el foco, se comprueba que la cantidad sea positiva -->
+      <input style="width:100%;" type="number" min="0" placeholder="cantidad" step="1" pattern="[0-9]+" ng-model="ctrl.cantidad" ng-blur="ctrl.comprobarCantidadCero()"></div>
     <div class="col"><a class="button button-icon icon ion-android-cart" ng-click="ctrl.agregarLibro()"></a></div>
   </div>
 </ion-item>

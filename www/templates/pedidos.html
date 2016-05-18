@@ -13,8 +13,11 @@
           <div class="list">
             <label class="item item-borderless item-input item-pedido">
               <span class="input-label">Cantidad: </span>
-              <!-- Cuando se cambia la cantidad del pedido se llama a un metodo que se encarga de pasarlo al almacenamiento -->
-              <input  type="number" min="0" placeholder="cantidad" step="1" pattern="[0-9]+" ng-model="pedido.cantidad" ng-change="ctrl.cambiarCantidad(pedido)">
+              <!-- Cuando se cambia la cantidad del pedido se llama a un metodo que se encarga de pasarlo al almacenamiento
+                   Al perder el foco se comprueba si la cantidad es cero (o vacio). No se hace en el ng-change porque
+                   a ese metodo se llama segun se edita y, en el proceso puede borrarse el numero para cambiarlo
+              -->
+              <input  type="number" min="0" placeholder="cantidad" step="1" pattern="[0-9]+" ng-model="pedido.cantidad"  ng-change="ctrl.cambiarCantidad(pedido)" ng-blur="ctrl.comprobarCantidadCero(pedido)">
             </label>
             <label class="item item-borderless item-pedido">
               <span class="input-label">Precio unitario: {{pedido.precioU}}€</span>

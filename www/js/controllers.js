@@ -1,26 +1,26 @@
 angular.module('starter.controllers', [])
 
-//**********************************
-//Controlador de la aplicacion
-//**********************************
-.controller('AppCtrl', ['$state', function($state) {
+  //**********************************
+  //Controlador de la aplicacion
+  //**********************************
+  .controller('AppCtrl', ['$state', function($state) {
 
-  var self = this;
+    var self = this;
 
-  //Funcion para hacer el logout
-  self.logout = function(){
-    //Eliminamos el usuario de la sesion y volvemos a la pantalla de login
-    sessionStorage.usuario = null;
-    $state.go('login');
-  };
+    //Funcion para hacer el logout
+    self.logout = function(){
+      //Eliminamos el usuario de la sesion y volvemos a la pantalla de login
+      sessionStorage.usuario = null;
+      $state.go('login');
+    };
 
 
-  //Devuelve el numero de elementos de pedido almacenados
-  self.getNumItems = function(){
-    return Object.keys(localStorage).length;
+    //Devuelve el numero de elementos de pedido almacenados
+    self.getNumItems = function(){
+      return Object.keys(localStorage).length;
 
-  };
-}])
+    };
+  }])
 
 
 
@@ -135,7 +135,7 @@ angular.module('starter.controllers', [])
         })
         //En cualquier caso, ocultamos el spinner
         .finally(function () {
-            Preloader.hideSpinner();
+          Preloader.hideSpinner();
         });
 
     }
@@ -147,92 +147,103 @@ angular.module('starter.controllers', [])
   //**********************************
   .controller('DetalleLibroCtrl', ['$stateParams', '$ionicPopup', '$ionicPopover', 'DetalleLibro', '$scope', '$state', 'Preloader',
     function($stateParams,$ionicPopup, $ionicPopover, DetalleLibro, $scope, $state, Preloader) {
-    var self = this;
+      var self = this;
 
-    //Cantidad del libro para añadir al pedido en caso de que se pulse el boton
-    self.cantidad = 1;
+      //Cantidad del libro para añadir al pedido en caso de que se pulse el boton
+      self.cantidad = 1;
 
-    //Controlamos si se ha realizado el proceso de login. Si no es asi, se vuelve a la pantalla de login.
-    if(sessionStorage.usuario == null){
-      $state.go('login');
-    }
+      //Controlamos si se ha realizado el proceso de login. Si no es asi, se vuelve a la pantalla de login.
+      if(sessionStorage.usuario == null){
+        $state.go('login');
+      }
 
-    //Mensajes de error
-    var errordatos='No se pudieron obtener los datos del libro';
-    var tituloerror='Error';
+      //Mensajes de error
+      var errordatos='No se pudieron obtener los datos del libro';
+      var tituloerror='Error';
 
-    //Creamos un objeto libro con todos los campos vacios, para evitar posibles problemas con valores nulos
-    self.libro = {id:"", title:"", price:"", cover:"", author:"", review:""};
+      //Creamos un objeto libro con todos los campos vacios, para evitar posibles problemas con valores nulos
+      self.libro = {id:"", title:"", price:"", cover:"", author:"", review:""};
 
-    //Utilizamos un popover para mostrar con mas detalle la parte de la review.
-    //Aqui lo inicializamos
-    $ionicPopover.fromTemplateUrl('review-popover.html', {
-      scope: $scope
-    }).then(function(popover) {
-      self.popover = popover;
-    });
+      //Utilizamos un popover para mostrar con mas detalle la parte de la review.
+      //Aqui lo inicializamos
+      $ionicPopover.fromTemplateUrl('review-popover.html', {
+        scope: $scope
+      }).then(function(popover) {
+        self.popover = popover;
+      });
 
-    //Mostramos el spinner avisando del proceso de carga
-    Preloader.showSpinner();
-    //Tratamos de obtener los detalles del libro
-    DetalleLibro.getDetalles($stateParams.libroId)
-      .success(function (data) {
-        //Si la recepcion de informacion ha sido correcta, tenemos que comprobar el estado
-        if(data.status!='KO'){
-          //Si no recibimos KO, lo que tenemos en data campos del detalle del libro
-          //Establecemos los datos como atributo libro
-          self.libro = data;
-        }else{
-          //Si recibimos KO, avisamos al usuario
+      //Mostramos el spinner avisando del proceso de carga
+      Preloader.showSpinner();
+      //Tratamos de obtener los detalles del libro
+      DetalleLibro.getDetalles($stateParams.libroId)
+        .success(function (data) {
+          //Si la recepcion de informacion ha sido correcta, tenemos que comprobar el estado
+          if(data.status!='KO'){
+            //Si no recibimos KO, lo que tenemos en data campos del detalle del libro
+            //Establecemos los datos como atributo libro
+            self.libro = data;
+          }else{
+            //Si recibimos KO, avisamos al usuario
+            $ionicPopup.alert({
+              title: tituloerror,
+              template: errordatos
+            });
+          }
+        })
+        //Si ha fallado la obtencion de datos, avisamos al usuario
+        .error(function () {
           $ionicPopup.alert({
             title: tituloerror,
             template: errordatos
           });
-        }
-      })
-      //Si ha fallado la obtencion de datos, avisamos al usuario
-      .error(function () {
-        $ionicPopup.alert({
-          title: tituloerror,
-          template: errordatos
+        })
+        .finally(function () {
+          //Ocultamos el spinner
+          Preloader.hideSpinner();
         });
-      })
-      .finally(function () {
-        //Ocultamos el spinner
-        Preloader.hideSpinner();
+
+
+      //Funcion para abrir el popover cuando se quiera ver la review completa
+      self.openPopover = function($event){
+        self.popover.show($event);
+      };
+
+      //Cierra el popover
+      self.closePopover = function() {
+        self.popover.hide();
+      };
+
+      //Elimina el popover cuando ya no se necesita
+      $scope.$on('$destroy', function() {
+        self.popover.remove();
       });
 
+      //Agrega el libro al pedido
+      self.agregarLibro = function(){
+        //Agregamos al array el id del libro y la cantidad
+        //Tomamos del almacenamiento posibles datos anteriores para ese libro
+        var pedidoAnt = JSON.parse(localStorage.getItem(self.libro.id));
+        //Nos aseguramos de que la cantidad sea mayor que cero
+        self.comprobarCantidadCero();
+        var nuevaCantidad = self.cantidad;
+        //Si hay datos anteriores para ese libro, la cantidad a introducir sera la suma de la anterior y la nueva
+        if(pedidoAnt != null){
+          nuevaCantidad = self.cantidad + parseInt(pedidoAnt.cantidad);
+        }
+        //Metemos en el almacenamiento el nuevo libro con la cantidad calculada en su caso
+        var pedidoTmp = {title:self.libro.title, cantidad:nuevaCantidad, precioU:self.libro.price};
+        localStorage.setItem(self.libro.id, JSON.stringify(pedidoTmp));
+      };
 
-    //Funcion para abrir el popover cuando se quiera ver la review completa
-    self.openPopover = function($event){
-      self.popover.show($event);
-    };
+      //Comprueba se la cantidad es cero y, en tal caso, la pone a uno
+      self.comprobarCantidadCero = function(){
+        if(self.cantidad == null || self.cantidad <= 0){
+          self.cantidad = 1;
+        }
+      };
 
-    //Cierra el popover
-    self.closePopover = function() {
-      self.popover.hide();
-    };
 
-    //Elimina el popover cuando ya no se necesita
-    $scope.$on('$destroy', function() {
-      self.popover.remove();
-    });
-
-    //Agrega el libro al pedido
-    self.agregarLibro = function(){
-      //Agregamos al array el id del libro y la cantidad
-      //Tomamos del almacenamiento posibles datos anteriores para ese libro
-      var pedidoAnt = JSON.parse(localStorage.getItem(self.libro.id));
-      var nuevaCantidad = self.cantidad;
-      //Si hay datos anteriores para ese libro, la cantidad a introducir sera la suma de la anterior y la nueva
-      if(pedidoAnt != null){
-        nuevaCantidad = self.cantidad + parseInt(pedidoAnt.cantidad);
-      }
-      //Metemos en el almacenamiento el nuevo libro con la cantidad calculada en su caso
-      var pedidoTmp = {title:self.libro.title, cantidad:nuevaCantidad, precioU:self.libro.price};
-      localStorage.setItem(self.libro.id, JSON.stringify(pedidoTmp));
-    };
-  }])
+    }])
 
 
   //**********************************
@@ -277,13 +288,10 @@ angular.module('starter.controllers', [])
 
     //Almacena de nuevo el elemento que recibe como parametro
     self.cambiarCantidad = function(elemento){
-      //Si la cantidad especificada es 0, eliminamos el elemento
-      if(elemento.cantidad <= 0) {
-        self.eliminarElemento(elemento);
-      }
-      //Si no, almacenamos de nuevo el elemento
-      else {
-        localStorage.setItem(elemento.id, JSON.stringify({
+      //Si la cantidad es mayor que cero, guardamos los datos
+      //Hay que considerar este caso porque el usuario puede borrar el numero para editarlo
+      if(elemento.cantidad > 0) {
+          localStorage.setItem(elemento.id, JSON.stringify({
           title: elemento.title,
           cantidad: elemento.cantidad,
           precioU: elemento.precioU
@@ -293,6 +301,17 @@ angular.module('starter.controllers', [])
       }
     };
 
+    //Comprueba si la cantidad introducida es cero o nulo
+    self.comprobarCantidadCero = function(elemento){
+      //Si el campo esta vacio, lo ponemos a cero para evitar problemas
+      if(elemento.cantidad === null){
+        elemento.cantidad=0;
+      }
+      //Si la cantidad especificada es 0, eliminamos el elemento
+      if(elemento.cantidad <= 0) {
+        self.eliminarElemento(elemento);
+      }
+    };
 
     //Calcula el importe total del pedido
     self.calcularTotal = function(){
@@ -319,6 +338,7 @@ angular.module('starter.controllers', [])
             //Si se cancela y se habia establecido la cantidad en 0, la dejamos en 1
             if(elemento.cantidad <= 0) {
               elemento.cantidad = 1;
+              self.cambiarCantidad(elemento);
             }
           }
         });
